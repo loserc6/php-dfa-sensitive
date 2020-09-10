@@ -109,6 +109,28 @@ class SensitiveHelper
     }
 
     /**
+     * @param null|string[]|string $words
+     * @return SensitiveHelper
+     * @throws PdsBusinessException
+     * @throws Exceptions\PdsSystemException
+     */
+    public function unsetFromTree($words = null)
+    {
+        if (empty($words)) {
+            throw new PdsBusinessException('词不能为空', PdsBusinessException::EMPTY_CONTENT);
+        }
+
+        if (is_string($words)) {
+            $this->removeWordFomTree($words);
+        } else {
+            foreach ($words as $word) {
+                $this->removeWordFomTree($word);
+            }
+        }
+        return $this;
+    }
+
+    /**
      * 检测文字中的敏感词
      *
      * @param string $content   待检测内容
@@ -305,7 +327,11 @@ class SensitiveHelper
         fclose($fp);
     }
 
-    // 将单个敏感词构建成树结构
+    /**
+     * 将单个敏感词构建成树结构
+     * @param string $word
+     * @throws Exceptions\PdsSystemException
+     */
     protected function buildWordToTree($word = '')
     {
         if ('' === $word) {
@@ -338,8 +364,45 @@ class SensitiveHelper
                 $tree->put('ending', true);
             }
         }
+    }
 
-        return;
+    /**
+     * 将单个敏感词移出tree
+     * @param string $word
+     * @throws Exceptions\PdsSystemException
+     */
+    protected function removeWordFomTree($word = '')
+    {
+        if ('' === $word) {
+            return;
+        }
+        $word = $this->filter($word);
+        $tree = $this->wordTree;
+
+        $wordLength = mb_strlen($word, 'utf-8');
+
+        for ($i = 0; $i < $wordLength; $i++) {
+            $this->forget($word, $tree);
+        }
+    }
+
+    protected function forget(&$word, $tree)
+    {
+        $wordLength = mb_strlen($word, 'utf-8');
+        for ($i = 0; $i < $wordLength; $i++) {
+            $keyChar = mb_substr($word, $i, 1, 'utf-8');
+            /** @var HashMap|null $tempTree */
+            $tempTree = $tree->get($keyChar);
+            if ($tempTree) {
+                if ($tempTree->size() <= 1) {
+                    $tree->forget($keyChar);
+                    $tree->size() <= 1 && $tree->put('ending', true);
+                    $word = mb_substr($word, 0, $i, 'utf-8');
+                } else {
+                    $tree = $tempTree;
+                }
+            }
+        }
     }
 
     /**

@@ -20,7 +20,8 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "~4.8|^6.4"
+        "phpunit/phpunit": "~4.8|^6.4",
+        "symfony/var-dumper": "~2.8"
     },
     "extra": {
       "branch-alias": {

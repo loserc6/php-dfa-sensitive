@@ -76,6 +76,22 @@ class HashMap
     }
 
     /**
+     * @param string $key
+     * @return mixed|null
+     * @see HashMap::remove()
+     *      用来替代上面remove方法remove方法在嵌套数组中会存在bug,current()会返回false
+     */
+    public function forget($key)
+    {
+        if (array_key_exists($key, $this->hashTable)) {
+            $tempValue = $this->hashTable[$key];
+            unset($this->hashTable[$key]);
+            return $tempValue;
+        }
+        return null;
+    }
+
+    /**
      * 获取HashMap的所有键值
      *
      * @return array

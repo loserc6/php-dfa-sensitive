@@ -50,4 +50,19 @@ class BaseTest extends TestCase
 
         $this->assertEquals('这是一段测试语句，请忽略*',$filterContent);
     }
+
+    public function testRemoveFromTree()
+    {
+        $content = '阿扁推翻';
+        $filter = SensitiveHelper::init();
+        $filter->setTree($this->wordData);
+
+        $hasBadWords = $filter->getBadWord($content);
+        $this->assertNotEmpty($hasBadWords);
+
+        $filter->unsetFromTree($content);
+
+        $removed = $filter->getBadWord($content);
+        $this->assertEmpty($removed);
+    }
 }
