@@ -259,7 +259,9 @@ class SensitiveHelper
         if (empty($badWordList)) {
             return $content;
         }
-
+        // 修复标记敏感词重复问题
+        $badWordList = array_unique($badWordList);
+        
         foreach ($badWordList as $badWord) {
             $replaceChar = $sTag . $badWord . $eTag;
             $content = str_replace($badWord, $replaceChar, $content);
